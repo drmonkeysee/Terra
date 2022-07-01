@@ -4,13 +4,16 @@ VENV := venv
 ACTIVATE := source $(VENV)/bin/activate
 PRODUCT := terra
 
-.PHONY: clean int purge run
+.PHONY: clean doc int purge run
 
 run: $(VENV)
 	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) $(PY) -m $(PRODUCT)
 
 int: $(VENV)
 	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) $(PY)
+
+doc: $(VENV)
+	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) pydoc $(PRODUCT)
 
 $(VENV):
 	$(PY) -m venv $@
