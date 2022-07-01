@@ -1,11 +1,16 @@
 PY := python3
+SRC_DIR := src
 VENV := venv
 ACTIVATE := source $(VENV)/bin/activate
+PRODUCT := terra
 
-.PHONY: clean purge run
+.PHONY: clean int purge run
 
 run: $(VENV)
-	$(ACTIVATE) && $(PY) main.py
+	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) $(PY) -m $(PRODUCT)
+
+int: $(VENV)
+	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) $(PY)
 
 $(VENV):
 	$(PY) -m venv $@
