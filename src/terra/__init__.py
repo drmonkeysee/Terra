@@ -1,3 +1,4 @@
-"""Terra package."""
+"""Terra application package."""
 
-version: str = '0.0.1'
+__author__: str = 'Brandon Stansbury'
+__version__: str = '0.0.1'
