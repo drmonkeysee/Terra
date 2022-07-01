@@ -1,1 +1,3 @@
-version = '0.0.1'
+"""Terra package."""
+
+version: str = '0.0.1'
