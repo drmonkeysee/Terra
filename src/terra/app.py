@@ -4,7 +4,7 @@ import curses
 import enum
 
 
-class InputCode(enum.IntEnum):
+class KeyCode(enum.IntEnum):
     QUIT = ord('q')
 
 
@@ -20,7 +20,7 @@ def _game_loop(stdscr):
     running = True
     while running:
         match stdscr.getch():
-            case InputCode.QUIT:
+            case KeyCode.QUIT:
                 running = False
             case c:
                 stdscr.addch(c)
