@@ -17,10 +17,9 @@ def run() -> None:
 def _game_loop(stdscr):
     stdscr.addstr(3, 5, 'Hello from Terra!')
     stdscr.move(4, 5)
-    running = True
-    while running:
+    while True:
         match stdscr.getch():
             case KeyCode.QUIT:
-                running = False
+                break
             case c:
                 stdscr.addch(c)
