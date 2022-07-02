@@ -1,6 +1,7 @@
 """Terra main application."""
 
 import curses
+import curses.panel
 import enum
 import logging
 
@@ -20,20 +21,21 @@ def run() -> None:
 
 
 def _game_loop(stdscr):
-    stdscr.addstr(3, 5, 'Hello from Terra!')
-    cpwin = _draw_codepage()
-    stdscr.move(4, 5)
+    cppan = _codepage_box()
+    inputpan = _input_box()
     while True:
         match stdscr.getch():
             case KeyCode.QUIT:
                 break
             case c:
-                stdscr.addch(c)
-        cpwin.noutrefresh()
+                inputpan.window().addch(c)
+        curses.panel.update_panels()
+        curses.doupdate()
 
 
-def _draw_codepage():
-    cpwin = curses.newwin(18, 18, 5, 20)
+def _codepage_box():
+    cpwin = curses.newwin(18, 18, 5, 70)
+    cppan = curses.panel.new_panel(cpwin)
     cpwin.box()
     cpwin.move(0, 0)
     for i, c in enumerate(CP437):
@@ -42,4 +44,13 @@ def _draw_codepage():
             logging.debug('iter %d: pos %s', i, cursor)
             cpwin.move(cursor[0] + 1, 1)
         cpwin.addstr(c)
-    return cpwin
+    return cppan
+
+
+def _input_box():
+    inputwin = curses.newwin(25, 60, 3, 5)
+    inputwin.box()
+    inputpan = curses.panel.new_panel(inputwin)
+    inputwin.addstr(1, 1, 'Hello from Terra!')
+    inputwin.move(3, 1)
+    return inputpan
