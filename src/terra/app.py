@@ -34,16 +34,13 @@ def _game_loop(stdscr):
 
 
 def _codepage_box():
-    cpwin = curses.newwin(18, 18, 5, 70)
+    dim = 16
+    cpwin = curses.newwin(dim + 2, dim * 2 + 1, 5, 70)
     cppan = curses.panel.new_panel(cpwin)
     cpwin.box()
-    cpwin.move(0, 0)
     for i, c in enumerate(CP437):
-        if i % 16 == 0:
-            cursor = cpwin.getyx()
-            logging.debug('iter %d: pos %s', i, cursor)
-            cpwin.move(cursor[0] + 1, 1)
-        cpwin.addstr(c)
+        y, x = divmod(i, dim)
+        cpwin.addstr(y + 1, (x * 2) + 1, c)
     return cppan
 
 
