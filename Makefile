@@ -5,8 +5,10 @@ ACTIVATE := source $(VENV)/bin/activate
 PRODUCT := terra
 DOCF ?=
 DOCT ?= $(PRODUCT)
+CLEAN_ASSETS := find . -type d -path ./$(VENV) -prune -o \
+	\( -name __pycache__ -o -name .mypy_cache \)
 
-.PHONY: clean doc int purge run type
+.PHONY: clean doc dryclean int purge run type
 
 run: $(VENV)
 	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) $(PY) -m $(PRODUCT)
@@ -25,8 +27,11 @@ $(VENV):
 	$(ACTIVATE) && pip install -U pip setuptools wheel \
 		&& pip install -r requirements.txt
 
+dryclean:
+	$(CLEAN_ASSETS) -print
+
 clean:
-	find . -type d -path ./$(VENV) -prune -o -name __pycache__ -exec $(RM) -r {} +
+	$(CLEAN_ASSETS) -exec $(RM) -r {} +
 
 purge: clean
 	$(RM) -r $(VENV)
