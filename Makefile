@@ -28,6 +28,7 @@ $(VENV):
 		&& pip install -r requirements.txt
 
 dryclean:
+	$(info "clean" will remove the following folders:)
 	$(CLEAN_ASSETS) -print
 
 clean:
