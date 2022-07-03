@@ -4,13 +4,13 @@ import curses
 import curses.panel
 import enum
 import typing
-if typing.TYPE_CHECKING:
-    import terra.sim
 
 from terra.codepage import CP437
+if typing.TYPE_CHECKING:
+    from terra.sim import Sim
 
 
-def start(sim: terra.sim.Sim) -> None:
+def start(sim: Sim) -> None:
     curses.wrapper(_main_loop, sim)
 
 
