@@ -3,6 +3,8 @@ SRC_DIR := src
 VENV := venv
 ACTIVATE := source $(VENV)/bin/activate
 PRODUCT := terra
+DOCF ?=
+DOCT ?= $(PRODUCT)
 
 .PHONY: clean doc int purge run
 
@@ -13,7 +15,7 @@ int: $(VENV)
 	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) $(PY)
 
 doc: $(VENV)
-	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) pydoc $(PRODUCT)
+	$(ACTIVATE) && PYTHONPATH=$(SRC_DIR) pydoc $(DOCF) $(DOCT)
 
 $(VENV):
 	$(PY) -m venv $@
