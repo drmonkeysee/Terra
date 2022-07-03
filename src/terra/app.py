@@ -17,16 +17,16 @@ class KeyCode(enum.IntEnum):
 
 class SimpleMap:
     CHAR_MAP: tuple[int, ...] = (0x20, 0x5, 0x6, 0x27, 0x2c, 0x3a, 0x3b)
-    WEIGHTS: tuple[int, ...] = (70, 5, 5, 5, 5, 5, 5)
+    WEIGHTS: tuple[int, ...] = tuple([70] + ([5] * (len(CHAR_MAP) - 1)))
 
     def __init__(self, height: int, width: int) -> None:
         self.height = height
         self.width = width
-        self.cells: list[int] = self._buildcells()
+        self.cells: tuple[int, ...] = self._buildcells()
 
     def _buildcells(self):
-        return random.choices(self.CHAR_MAP, weights=self.WEIGHTS,
-                              k=self.height * self.width)
+        return tuple(random.choices(self.CHAR_MAP, weights=self.WEIGHTS,
+                                    k=self.height * self.width))
 
 
 def run() -> None:
