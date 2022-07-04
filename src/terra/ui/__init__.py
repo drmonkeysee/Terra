@@ -13,10 +13,7 @@ from terra.ui.views import CodePageView, EchoInputView, MapView, center_in_win
 
 
 def start(sim: Simulation) -> None:
-    """Start the main game loop.
-
-    :param sim: simulation object
-    """
+    """Start the main game loop."""
     curses.wrapper(_main_loop, sim)
 
 

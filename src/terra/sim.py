@@ -38,6 +38,6 @@ class SimpleMap:
         cells = random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
                                k=self.size)
         if cells:
-            cells[0] = 0x41
-            cells[-1] = 0x5a
+            cells[0] = 0x41     # 'A'
+            cells[-1] = 0x5a    # 'Z'
         return tuple(cells)
