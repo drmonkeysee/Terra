@@ -10,7 +10,7 @@ import typing
 from terra.codepage import CP437
 if typing.TYPE_CHECKING:
     from terra.sim import Simulation
-from terra.ui.views import EchoInputView
+from terra.ui.views import CodePageView, EchoInputView
 
 
 def start(sim: Simulation) -> None:
@@ -29,8 +29,8 @@ class _KeyCode(enum.IntEnum):
 
 
 def _main_loop(stdscr, sim):
-    cpview = _codepage_view()
-    cpview.hide()
+    cpview = CodePageView(5, 70)
+    cpview.toggle_visibility()
     mapview = _map_view(stdscr)
     _new_map(mapview.window(), sim)
     echoview = EchoInputView(10, 20, 3, 5)
@@ -41,38 +41,13 @@ def _main_loop(stdscr, sim):
             case _KeyCode.QUIT:
                 break
             case _KeyCode.TOGGLE_CODEPAGE:
-                if cpview.hidden():
-                    cpview.show()
-                else:
-                    cpview.hide()
+                cpview.toggle_visibility()
             case _KeyCode.TOGGLE_ECHO:
                 echoview.toggle_visibility()
             case c:
                 echoview.echoch(c)
         curses.panel.update_panels()
         curses.doupdate()
-
-
-def _codepage_view():
-    dim = 16
-    height = dim + 4
-    width = (dim * 2) + 3
-    view = _create_view(height, width, 5, 70, title='Code Page 437')
-    view.window().addstr(1, 1, '\\')
-    view.window().hline(2, 1, 0, width - 2)
-    view.window().vline(1, 2, 0, height - 2)
-    view.window().addch(2, 0, curses.ACS_LTEE)
-    view.window().addch(2, 2, curses.ACS_PLUS)
-    view.window().addch(2, width - 1, curses.ACS_RTEE)
-    view.window().addch(height - 1, 2, curses.ACS_BTEE)
-    grid_pad = 3
-    for i in range(dim):
-        view.window().addstr(1, (i * 2) + grid_pad, f'{i:X}')
-    for i, c in enumerate(CP437):
-        y, x = divmod(i, dim)
-        view.window().addstr(y + grid_pad, 1, f'{y:X}')
-        view.window().addstr(y + grid_pad, (x * 2) + grid_pad, c)
-    return view
 
 
 def _map_view(stdscr):

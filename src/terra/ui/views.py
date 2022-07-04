@@ -4,6 +4,8 @@ import abc
 import curses
 import curses.panel
 
+from terra.codepage import CP437
+
 
 class View(abc.ABC):
     """Abstract curses view.
@@ -28,8 +30,8 @@ class View(abc.ABC):
                   height of the view's frame, not the nested content
         :param w: width of view in cells; if padding is specified this is the
                   width of the view's frame, not the nested content
-        :param y: y-position of view in screen space
-        :param x: x-position of view in screen space
+        :param y: y-position of view in screen-space
+        :param x: x-position of view in screen-space
         :param padding: padding between view frame and content;
                         if not set then content and frame are the same window
         :param title: optional view title
@@ -47,9 +49,9 @@ class View(abc.ABC):
     def toggle_visibility(self) -> None:
         """Toggle view visibility."""
         if self._frame_panel.hidden():
+            self._frame_panel.show()
             if self._content_panel:
                 self._content_panel.show()
-            self._frame_panel.show()
         else:
             self._frame_panel.hide()
             if self._content_panel:
@@ -79,3 +81,35 @@ class EchoInputView(View):
     def echoch(self, ch: int) -> None:
         """Echo a character to the view's current cursor position."""
         self.content.addch(ch)
+
+
+class CodePageView(View):
+    """Code page 437 display view."""
+
+    def __init__(self, y: int, x: int) -> None:
+        """Create code page display view.
+
+        :param y: y-position of view in screen-space
+        :param x: x-position of view in screen-space
+        """
+        # NOTE: 16x16 display
+        dim = 16
+        super().__init__(dim + 4, (dim * 2) + 3, y, x, title='Code Page 437')
+        self._draw_codepage(dim)
+
+    def _draw_codepage(self, dim):
+        height, width = self._frame.getmaxyx()
+        self.content.addstr(1, 1, '\\')
+        self.content.hline(2, 1, 0, width - 2)
+        self.content.vline(1, 2, 0, height - 2)
+        self.content.addch(2, 0, curses.ACS_LTEE)
+        self.content.addch(2, 2, curses.ACS_PLUS)
+        self.content.addch(2, width - 1, curses.ACS_RTEE)
+        self.content.addch(height - 1, 2, curses.ACS_BTEE)
+        grid_pad = 3
+        for i in range(dim):
+            self.content.addstr(1, (i * 2) + grid_pad, f'{i:X}')
+        for i, c in enumerate(CP437):
+            y, x = divmod(i, dim)
+            self.content.addstr(y + grid_pad, 1, f'{y:X}')
+            self.content.addstr(y + grid_pad, (x * 2) + grid_pad, c)
