@@ -1,3 +1,5 @@
+"""Curses UI layer, including main game/event loop."""
+
 from __future__ import annotations
 
 import curses
@@ -11,6 +13,10 @@ if typing.TYPE_CHECKING:
 
 
 def start(sim: Sim) -> None:
+    """Start the main game loop.
+
+    :param sim: simulation object
+    """
     curses.wrapper(_main_loop, sim)
 
 

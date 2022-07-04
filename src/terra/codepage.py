@@ -1,4 +1,4 @@
-"""Codepage definition."""
+"""Code page definition."""
 
 CP437: tuple[str, ...] = (
     '\u2400', '\u263a', '\u263b', '\u2665',

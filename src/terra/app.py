@@ -8,6 +8,7 @@ from terra.sim import Sim
 
 
 def run() -> None:
+    """Start the Terra application."""
     print('Starting Terra...')
     logging.basicConfig(filename='debug.log', filemode='w',
                         level=logging.DEBUG)
