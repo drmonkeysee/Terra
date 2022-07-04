@@ -16,7 +16,7 @@ class Sim:
         :param height: height of world map in cells
         :param width: width of world map in cells
         """
-        self.world_map: SimpleMap = SimpleMap(height, width)
+        self.world_map: SimpleMap = SimpleMap(height * width)
 
 
 class SimpleMap:
@@ -26,16 +26,14 @@ class SimpleMap:
     _WEIGHTS: tuple[int, ...] = tuple([100 - (5 * (len(_CHAR_MAP) - 1))]
                                       + ([5] * (len(_CHAR_MAP) - 1)))
 
-    def __init__(self, height: int, width: int) -> None:
+    def __init__(self, size: int) -> None:
         """Generate a random map.
 
-        :param height: height of world map in cells
-        :param width: width of world map in cells
+        :param size: size of world map in cells
         """
-        self.height = height
-        self.width = width
+        self.size = size
         self.cells: tuple[int, ...] = self._buildcells()
 
     def _buildcells(self):
         return tuple(random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
-                                    k=self.height * self.width))
+                                    k=self.size))
