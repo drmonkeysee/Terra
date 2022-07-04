@@ -22,9 +22,9 @@ class Sim:
 class SimpleMap:
     """A map composed of cells."""
 
-    CHAR_MAP: tuple[int, ...] = (0x20, 0x5, 0x6, 0x27, 0x2c, 0x3a, 0x3b)
-    WEIGHTS: tuple[int, ...] = tuple([100 - (5 * (len(CHAR_MAP) - 1))]
-                                     + ([5] * (len(CHAR_MAP) - 1)))
+    _CHAR_MAP: tuple[int, ...] = (0x20, 0x5, 0x6, 0x27, 0x2c, 0x3a, 0x3b)
+    _WEIGHTS: tuple[int, ...] = tuple([100 - (5 * (len(_CHAR_MAP) - 1))]
+                                      + ([5] * (len(_CHAR_MAP) - 1)))
 
     def __init__(self, height: int, width: int) -> None:
         """Generate a random map.
@@ -37,5 +37,5 @@ class SimpleMap:
         self.cells: tuple[int, ...] = self._buildcells()
 
     def _buildcells(self):
-        return tuple(random.choices(self.CHAR_MAP, weights=self.WEIGHTS,
+        return tuple(random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
                                     k=self.height * self.width))

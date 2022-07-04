@@ -20,7 +20,7 @@ def start(sim: Sim) -> None:
     curses.wrapper(_main_loop, sim)
 
 
-class KeyCode(enum.IntEnum):
+class _KeyCode(enum.IntEnum):
     GEN_MAP = ord('m')
     QUIT = ord('q')
     TOGGLE_CODEPAGE = ord('c')
@@ -34,11 +34,11 @@ def _main_loop(stdscr, sim):
     echopan = _echo_panel()
     while True:
         match stdscr.getch():
-            case KeyCode.GEN_MAP:
+            case _KeyCode.GEN_MAP:
                 _new_map(mappan.window(), sim)
-            case KeyCode.QUIT:
+            case _KeyCode.QUIT:
                 break
-            case KeyCode.TOGGLE_CODEPAGE:
+            case _KeyCode.TOGGLE_CODEPAGE:
                 if cppan.hidden():
                     cppan.show()
                 else:
