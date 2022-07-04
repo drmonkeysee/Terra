@@ -1,10 +1,16 @@
 """UI abstract and concrete views."""
 
+from __future__ import annotations
+
 import abc
 import curses
 import curses.panel
+import typing
+from itertools import islice
 
 from terra.codepage import CP437
+if typing.TYPE_CHECKING:
+    from terra.sim import SimpleMap
 
 
 class View(abc.ABC):
@@ -113,3 +119,47 @@ class CodePageView(View):
             y, x = divmod(i, dim)
             self.content.addstr(y + grid_pad, 1, f'{y:X}')
             self.content.addstr(y + grid_pad, (x * 2) + grid_pad, c)
+
+
+class MapView(View):
+    """Display simple map view."""
+
+    def __init__(self, *args: int) -> None:
+        """Create a simple map view.
+
+        :param *args: size/position parameters passed to parent class
+        """
+        super().__init__(*args, padding=1, title='Terra')
+
+    def draw_map(self, world_map: SimpleMap) -> None:
+        """Draw the map made of the given cells."""
+        h, w = self.content.getmaxyx()
+        safe_cells = islice(world_map.cells, len(world_map.cells) - 1)
+        for i, c in enumerate(safe_cells):
+            y, x = divmod(i, w)
+            self.content.addstr(y, x, CP437[c])
+        # NOTE: last cell (lower-right) must be inserted instead of added to
+        # avoid the error thrown by trying to wrap the cursor off the edge
+        # of the window.
+        self.content.insstr(h - 1, w - 1, CP437[world_map.cells[-1]])
+
+
+def center_in_win(parent_win: curses.window,
+                  h: int, w: int) -> tuple[int, int, int, int]:
+    """Calculate y/x coordinates for centering a window of given size within a
+    parent window.
+
+    :param parent_win: the parent window in which to center the given
+                       dimensions
+    :param h: child window height
+    :param w: child window width
+    :returns: tuple of (height, width, y, x) coordinates centered within
+              parent_win
+    :raises ValueError: if parent_win is too small to fit the given dimensions
+    """
+    parent_height, parent_width = parent_win.getmaxyx()
+    y, x = (parent_height - h) // 2, (parent_width - w) // 2
+    if y < 0 or x < 0:
+        raise ValueError('parent window is too small to contain'
+                         f' centered window of (h: {h}, w: {w})')
+    return h, w, y, x
