@@ -3,7 +3,7 @@
 import random
 
 
-class Sim:
+class Simulation:
     """Primary simulation object."""
 
     def __init__(self) -> None:
@@ -35,5 +35,9 @@ class SimpleMap:
         self.cells: tuple[int, ...] = self._buildcells()
 
     def _buildcells(self):
-        return tuple(random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
-                                    k=self.size))
+        cells = random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
+                               k=self.size)
+        if cells:
+            cells[0] = 0x41
+            cells[-1] = 0x5a
+        return tuple(cells)

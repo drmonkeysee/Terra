@@ -9,10 +9,10 @@ import typing
 
 from terra.codepage import CP437
 if typing.TYPE_CHECKING:
-    from terra.sim import Sim
+    from terra.sim import Simulation
 
 
-def start(sim: Sim) -> None:
+def start(sim: Simulation) -> None:
     """Start the main game loop.
 
     :param sim: simulation object

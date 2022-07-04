@@ -4,7 +4,7 @@ import logging
 import random
 
 import terra.ui
-from terra.sim import Sim
+from terra.sim import Simulation
 
 
 def run() -> None:
@@ -13,6 +13,6 @@ def run() -> None:
     logging.basicConfig(filename='debug.log', filemode='w',
                         level=logging.DEBUG)
     random.seed(0)
-    s = Sim()
+    s = Simulation()
     terra.ui.start(s)
     print('Terra exited')
