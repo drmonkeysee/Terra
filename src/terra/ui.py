@@ -27,46 +27,42 @@ class _KeyCode(enum.IntEnum):
 
 
 def _main_loop(stdscr, sim):
-    cppan = _codepage_panel()
-    cppan.hide()
-    mappan = _map_panel(stdscr)
-    _new_map(mappan.window(), sim)
-    echopan = _echo_panel()
+    cpview = _codepage_view()
+    cpview.hide()
+    mapview = _map_view(stdscr)
+    _new_map(mapview.window(), sim)
+    echoview = _echo_view()
     while True:
         match stdscr.getch():
             case _KeyCode.GEN_MAP:
-                _new_map(mappan.window(), sim)
+                _new_map(mapview.window(), sim)
             case _KeyCode.QUIT:
                 break
             case _KeyCode.TOGGLE_CODEPAGE:
-                if cppan.hidden():
-                    cppan.show()
+                if cpview.hidden():
+                    cpview.show()
                 else:
-                    cppan.hide()
+                    cpview.hide()
             case c:
-                echopan.window().addch(c)
+                echoview.window().addch(c)
         curses.panel.update_panels()
         curses.doupdate()
 
 
-def _codepage_panel():
+def _codepage_view():
     dim = 16
-    win = curses.newwin(dim + 2, dim * 2 + 1, 5, 70)
-    panel = curses.panel.new_panel(win)
-    win.box()
+    view = _create_view(dim + 2, dim * 2 + 1, 5, 70, title='Code Page 437')
     for i, c in enumerate(CP437):
         y, x = divmod(i, dim)
-        win.addstr(y + 1, (x * 2) + 1, c)
-    return panel
+        view.window().addstr(y + 1, (x * 2) + 1, c)
+    return view
 
 
-def _map_panel(stdscr):
+def _map_view(stdscr):
     w, h = 102, 32
     screenh, screenw = stdscr.getmaxyx()
-    win = curses.newwin(h, w, (screenh - h) // 2, (screenw - w) // 2)
-    panel = curses.panel.new_panel(win)
-    win.box()
-    return panel
+    return _create_view(h, w, (screenh - h) // 2, (screenw - w) // 2,
+                        title='Terra')
 
 
 def _new_map(map_win, sim):
@@ -77,10 +73,20 @@ def _new_map(map_win, sim):
         map_win.addstr(y + 1, x + 1, CP437[c])
 
 
-def _echo_panel():
-    win = curses.newwin(10, 20, 3, 5)
-    panel = curses.panel.new_panel(win)
+def _echo_view():
+    view = _create_view(10, 20, 3, 5)
+    view.window().addstr(1, 1, 'Hello from Terra!')
+    view.window().move(3, 1)
+    return view
+
+
+def _create_view(h, w, y, x, /, *, title=None):
+    win = curses.newwin(h, w, y, x)
+    pan = curses.panel.new_panel(win)
     win.box()
-    win.addstr(1, 1, 'Hello from Terra!')
-    win.move(3, 1)
-    return panel
+    if title:
+        padding = 2
+        if len(title) > w - (padding * 2):
+            title = f'{title[:-2]}…'
+        win.addstr(0, padding, title)
+    return pan
