@@ -24,6 +24,7 @@ class _KeyCode(enum.IntEnum):
     GEN_MAP = ord('m')
     QUIT = ord('q')
     TOGGLE_CODEPAGE = ord('c')
+    TOGGLE_ECHO = ord('o')
 
 
 def _main_loop(stdscr, sim):
@@ -31,7 +32,7 @@ def _main_loop(stdscr, sim):
     cpview.hide()
     mapview = _map_view(stdscr)
     _new_map(mapview.window(), sim)
-    echoview = _echo_view()
+    echoview, echocontent = _echo_view()
     while True:
         match stdscr.getch():
             case _KeyCode.GEN_MAP:
@@ -43,8 +44,15 @@ def _main_loop(stdscr, sim):
                     cpview.show()
                 else:
                     cpview.hide()
+            case _KeyCode.TOGGLE_ECHO:
+                if echoview.hidden():
+                    echoview.show()
+                    echocontent.show()
+                else:
+                    echocontent.hide()
+                    echoview.hide()
             case c:
-                echoview.window().addch(c)
+                echocontent.window().addch(c)
         curses.panel.update_panels()
         curses.doupdate()
 
@@ -88,9 +96,10 @@ def _new_map(map_win, sim):
 
 def _echo_view():
     view = _create_view(10, 20, 3, 5)
-    view.window().addstr(1, 1, 'Hello from Terra!')
-    view.window().move(3, 1)
-    return view
+    contentwin = view.window().derwin(8, 18, 1, 1)
+    contentwin.addstr(0, 0, 'Hello from Terra!')
+    contentwin.move(2, 0)
+    return view, curses.panel.new_panel(contentwin)
 
 
 def _create_view(h, w, y, x, /, *, title=None):
