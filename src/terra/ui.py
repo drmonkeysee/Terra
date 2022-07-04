@@ -51,10 +51,23 @@ def _main_loop(stdscr, sim):
 
 def _codepage_view():
     dim = 16
-    view = _create_view(dim + 2, dim * 2 + 1, 5, 70, title='Code Page 437')
+    height = dim + 4
+    width = (dim * 2) + 3
+    view = _create_view(height, width, 5, 70, title='Code Page 437')
+    view.window().addstr(1, 1, '\\')
+    view.window().hline(2, 1, 0, width - 2)
+    view.window().vline(1, 2, 0, height - 2)
+    view.window().addch(2, 0, curses.ACS_LTEE)
+    view.window().addch(2, 2, curses.ACS_PLUS)
+    view.window().addch(2, width - 1, curses.ACS_RTEE)
+    view.window().addch(height - 1, 2, curses.ACS_BTEE)
+    grid_pad = 3
+    for i in range(dim):
+        view.window().addstr(1, (i * 2) + grid_pad, f'{i:X}')
     for i, c in enumerate(CP437):
         y, x = divmod(i, dim)
-        view.window().addstr(y + 1, (x * 2) + 1, c)
+        view.window().addstr(y + grid_pad, 1, f'{y:X}')
+        view.window().addstr(y + grid_pad, (x * 2) + grid_pad, c)
     return view
 
 
