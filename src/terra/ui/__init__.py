@@ -10,6 +10,7 @@ import typing
 from terra.codepage import CP437
 if typing.TYPE_CHECKING:
     from terra.sim import Simulation
+from terra.ui.views import EchoInputView
 
 
 def start(sim: Simulation) -> None:
@@ -32,7 +33,7 @@ def _main_loop(stdscr, sim):
     cpview.hide()
     mapview = _map_view(stdscr)
     _new_map(mapview.window(), sim)
-    echoview, echocontent = _echo_view()
+    echoview = EchoInputView(10, 20, 3, 5)
     while True:
         match stdscr.getch():
             case _KeyCode.GEN_MAP:
@@ -45,14 +46,9 @@ def _main_loop(stdscr, sim):
                 else:
                     cpview.hide()
             case _KeyCode.TOGGLE_ECHO:
-                if echoview.hidden():
-                    echoview.show()
-                    echocontent.show()
-                else:
-                    echocontent.hide()
-                    echoview.hide()
+                echoview.toggle_visibility()
             case c:
-                echocontent.window().addch(c)
+                echoview.echoch(c)
         curses.panel.update_panels()
         curses.doupdate()
 
@@ -92,14 +88,6 @@ def _new_map(map_win, sim):
     for i, c in enumerate(sim.world_map.cells):
         y, x = divmod(i, w)
         map_win.addstr(y + 1, x + 1, CP437[c])
-
-
-def _echo_view():
-    view = _create_view(10, 20, 3, 5)
-    contentwin = view.window().derwin(8, 18, 1, 1)
-    contentwin.addstr(0, 0, 'Hello from Terra!')
-    contentwin.move(2, 0)
-    return view, curses.panel.new_panel(contentwin)
 
 
 def _create_view(h, w, y, x, /, *, title=None):
