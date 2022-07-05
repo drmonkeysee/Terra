@@ -46,6 +46,8 @@ class View(abc.ABC):
         self._frame_panel = curses.panel.new_panel(self._frame)
         self._frame.box()
         self._content, self._content_panel = self._init_content(h, w, padding)
+        if title:
+            self._set_title(w, title)
 
     @property
     def content(self) -> curses.window:
@@ -70,6 +72,13 @@ class View(abc.ABC):
         ch, cw = h - adjustment, w - adjustment
         content = self._frame.derwin(ch, cw, padding, padding)
         return content, curses.panel.new_panel(content)
+
+    def _set_title(self, width, title):
+        # NOTE: calculate overflow as negative to use directly in slicing
+        title_overflow = (width - 2) - len(title)
+        if title_overflow < 0:
+            title = f'{title[:title_overflow - 1]}…'
+        self._frame.addstr(0, 1, title)
 
 
 class EchoInputView(View):
@@ -100,11 +109,12 @@ class CodePageView(View):
         """
         # NOTE: 16x16 display
         dim = 16
-        super().__init__(dim + 4, (dim * 2) + 3, y, x, title='Code Page 437')
-        self._draw_codepage(dim)
+        height = dim + 4
+        width = (dim * 2) + 3
+        super().__init__(height, width, y, x, title='Code Page 437')
+        self._draw_codepage(dim, height, width)
 
-    def _draw_codepage(self, dim):
-        height, width = self._frame.getmaxyx()
+    def _draw_codepage(self, dim, height, width):
         self.content.addstr(1, 1, '\\')
         self.content.hline(2, 1, 0, width - 2)
         self.content.vline(1, 2, 0, height - 2)
