@@ -61,17 +61,19 @@ class _FrameClock:
 
 
 def _main_loop(stdscr, sim):
+    stdscr.nodelay(True)
+    curses.curs_set(0)
+
     codepage_view = CodePageView(5, 70)
     codepage_view.toggle_visibility()
     map_view = MapView(*center_in_win(stdscr, 32, 102))
     _new_map(map_view, sim)
     echo_view = EchoInputView(10, 20, 3, 5)
     metrics_view = FrameMetricsView(15, 5)
-    stdscr.nodelay(True)
-    curses.curs_set(0)
+
     frame_clock = _FrameClock()
-    running = True
     frame_clock.start()
+    running = True
     while running:
         frame_clock.tick()
         running = _process_input(stdscr, codepage_view, map_view, echo_view,
