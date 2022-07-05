@@ -8,7 +8,7 @@ import curses.panel
 import typing
 from itertools import islice
 
-from terra.codepage import CP437
+from terra.codepage import CP437, MISSING
 if typing.TYPE_CHECKING:
     from terra.sim import SimpleMap, Simulation
 
@@ -115,7 +115,7 @@ class CodePageView(View):
         self._draw_codepage(dim, height, width)
 
     def _draw_codepage(self, dim, height, width):
-        self.content.addstr(1, 1, '\\')
+        self.content.addstr(1, 1, MISSING)
         self.content.hline(2, 1, 0, width - 2)
         self.content.vline(1, 2, 0, height - 2)
         self.content.addch(2, 0, curses.ACS_LTEE)

@@ -1,5 +1,6 @@
 """Code page definition."""
 
+MISSING: str = '\ufffd'
 CP437: tuple[str, ...] = (
     '\u2400', '\u263a', '\u263b', '\u2665',
     '\u2666', '\u2663', '\u2660', '\u2022',
