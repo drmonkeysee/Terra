@@ -68,6 +68,7 @@ def _main_loop(stdscr, sim):
     echo_view = EchoInputView(10, 20, 3, 5)
     metrics_view = FrameMetricsView(15, 5)
     stdscr.nodelay(True)
+    curses.curs_set(0)
     frame_clock = _FrameClock()
     running = True
     frame_clock.start()
