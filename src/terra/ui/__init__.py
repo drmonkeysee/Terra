@@ -27,8 +27,8 @@ class _KeyCode(enum.IntEnum):
     TOGGLE_ECHO = ord('o')
 
 
-FPS: float = 30.0
-VSYNC: float = 1.0 / FPS
+_FPS = 30.0
+_VSYNC = 1.0 / _FPS
 
 
 class _FrameClock:
@@ -54,9 +54,9 @@ class _FrameClock:
         self.previous = self.current
         frame_elapsed = time.monotonic() - self.current
         # NOTE: we've blown our time budget :( so try to catch up
-        if frame_elapsed > VSYNC:
+        if frame_elapsed > _VSYNC:
             return
-        frame_left = VSYNC - frame_elapsed
+        frame_left = _VSYNC - frame_elapsed
         time.sleep(frame_left)
 
 
