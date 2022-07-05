@@ -9,7 +9,9 @@ import typing
 
 if typing.TYPE_CHECKING:
     from terra.sim import Simulation
-from terra.ui.views import CodePageView, EchoInputView, MapView, center_in_win
+from terra.ui.views import (
+    CodePageView, EchoInputView, FrameMetricsView, MapView, center_in_win
+)
 
 
 def start(sim: Simulation) -> None:
@@ -30,8 +32,10 @@ def _main_loop(stdscr, sim):
     map_view = MapView(*center_in_win(stdscr, 32, 102))
     _new_map(map_view, sim)
     echo_view = EchoInputView(10, 20, 3, 5)
+    metrics_view = FrameMetricsView(15, 5)
     while _process_input(stdscr, codepage_view, map_view, echo_view, sim):
-        _redraw()
+        _update(sim)
+        _redraw(metrics_view, sim)
 
 
 def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
@@ -49,7 +53,12 @@ def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
     return True
 
 
-def _redraw():
+def _update(sim):
+    sim.update()
+
+
+def _redraw(metrics_view, sim):
+    metrics_view.draw(sim)
     curses.panel.update_panels()
     curses.doupdate()
 

@@ -9,6 +9,7 @@ class Simulation:
     def __init__(self) -> None:
         """Create new simulation."""
         self.create_map(0, 0)
+        self.sim_value: int = 0
 
     def create_map(self, height: int, width: int) -> None:
         """Generate a new world map.
@@ -17,6 +18,10 @@ class Simulation:
         :param width: width of world map in cells
         """
         self.world_map: SimpleMap = SimpleMap(height * width)
+
+    def update(self) -> None:
+        """Run the simulation for a given time-slice."""
+        self.sim_value += 1
 
 
 class SimpleMap:

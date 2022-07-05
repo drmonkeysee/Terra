@@ -10,7 +10,7 @@ from itertools import islice
 
 from terra.codepage import CP437
 if typing.TYPE_CHECKING:
-    from terra.sim import SimpleMap
+    from terra.sim import SimpleMap, Simulation
 
 
 class View(abc.ABC):
@@ -152,6 +152,21 @@ class MapView(View):
         # avoid the error thrown by trying to wrap the cursor off the edge
         # of the window.
         self.content.insstr(h - 1, w - 1, CP437[world_map.cells[-1]])
+
+
+class FrameMetricsView(View):
+    """Display frame performance metrics."""
+
+    def __init__(self, y: int, x: int) -> None:
+        """Create code page display view.
+
+        :param y: y-position of view in screen-space
+        :param x: x-position of view in screen-space
+        """
+        super().__init__(5, 20, y, x, padding=2, title='Frame Metrics')
+
+    def draw(self, sim: Simulation) -> None:
+        self.content.addstr(0, 0, f'Sim value: {sim.sim_value}')
 
 
 def center_in_win(parent_win: curses.window,
