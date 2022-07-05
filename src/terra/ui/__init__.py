@@ -35,11 +35,11 @@ class _FrameClock:
     def __init__(self):
         self.current = 0.0
         self.previous = 0.0
-        self.elapsed = 0.0
+        self.budget = 0.0
 
     @property
-    def elapsed_ms(self):
-        return self.elapsed * 1000
+    def budget_ms(self):
+        return self.budget * 1000
 
     def start(self):
         self.previous = time.monotonic()
@@ -47,8 +47,8 @@ class _FrameClock:
     def tick(self):
         self.current = time.monotonic()
         frametime = self.current - self.previous
-        # NOTE: don't let time budget get beyond 1 second
-        self.elapsed = max(self.elapsed + frametime, 1.0)
+        # NOTE: don't let budget get beyond 1 second total
+        self.budget = max(self.budget + frametime, 1.0)
 
     def sleep(self):
         self.previous = self.current
@@ -79,7 +79,7 @@ def _main_loop(stdscr, sim):
         running = _process_input(stdscr, codepage_view, map_view, echo_view,
                                  sim)
         if running:
-            sim.update(frame_clock.elapsed_ms)
+            sim.update(frame_clock.budget_ms)
             _redraw(metrics_view, sim)
         frame_clock.sleep()
 
