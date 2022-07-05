@@ -163,7 +163,7 @@ class FrameMetricsView(View):
         :param y: y-position of view in screen-space
         :param x: x-position of view in screen-space
         """
-        super().__init__(5, 20, y, x, padding=2, title='Frame Metrics')
+        super().__init__(5, 30, y, x, padding=2, title='Frame Metrics')
 
     def draw(self, sim: Simulation) -> None:
         self.content.addstr(0, 0, f'Sim value: {sim.sim_value}')

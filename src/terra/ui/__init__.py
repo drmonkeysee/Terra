@@ -33,6 +33,7 @@ def _main_loop(stdscr, sim):
     _new_map(map_view, sim)
     echo_view = EchoInputView(10, 20, 3, 5)
     metrics_view = FrameMetricsView(15, 5)
+    stdscr.nodelay(True)
     while _process_input(stdscr, codepage_view, map_view, echo_view, sim):
         _update(sim)
         _redraw(metrics_view, sim)
@@ -48,7 +49,7 @@ def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
             codepage_view.toggle_visibility()
         case _KeyCode.TOGGLE_ECHO:
             echo_view.toggle_visibility()
-        case c:
+        case c if c > -1:
             echo_view.echoch(c)
     return True
 
