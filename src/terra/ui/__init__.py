@@ -48,7 +48,7 @@ class _FrameClock:
         self.current = time.monotonic()
         frametime = self.current - self.previous
         # NOTE: don't let budget get beyond 1 second total
-        self.budget = max(self.budget + frametime, 1.0)
+        self.budget = min(self.budget + frametime, 1.0)
 
     def sleep(self):
         self.previous = self.current
