@@ -5,6 +5,7 @@ from __future__ import annotations
 import curses
 import curses.panel
 import enum
+import time
 import typing
 
 if typing.TYPE_CHECKING:
@@ -26,6 +27,39 @@ class _KeyCode(enum.IntEnum):
     TOGGLE_ECHO = ord('o')
 
 
+FPS: float = 30.0
+VSYNC: float = 1.0 / FPS
+
+
+class _FrameClock:
+    def __init__(self):
+        self.current = 0.0
+        self.previous = 0.0
+        self.elapsed = 0.0
+
+    @property
+    def elapsed_ms(self):
+        return self.elapsed * 1000
+
+    def start(self):
+        self.previous = time.monotonic()
+
+    def tick(self):
+        self.current = time.monotonic()
+        frametime = self.current - self.previous
+        # NOTE: don't let time budget get beyond 1 second
+        self.elapsed = max(self.elapsed + frametime, 1.0)
+
+    def sleep(self):
+        self.previous = self.current
+        frame_elapsed = time.monotonic() - self.current
+        # NOTE: we've blown our time budget :( so try to catch up
+        if frame_elapsed > VSYNC:
+            return
+        frame_left = VSYNC - frame_elapsed
+        time.sleep(frame_left)
+
+
 def _main_loop(stdscr, sim):
     codepage_view = CodePageView(5, 70)
     codepage_view.toggle_visibility()
@@ -34,9 +68,17 @@ def _main_loop(stdscr, sim):
     echo_view = EchoInputView(10, 20, 3, 5)
     metrics_view = FrameMetricsView(15, 5)
     stdscr.nodelay(True)
-    while _process_input(stdscr, codepage_view, map_view, echo_view, sim):
-        _update(sim)
-        _redraw(metrics_view, sim)
+    frame_clock = _FrameClock()
+    running = True
+    frame_clock.start()
+    while running:
+        frame_clock.tick()
+        running = _process_input(stdscr, codepage_view, map_view, echo_view,
+                                 sim)
+        if running:
+            sim.update(frame_clock.elapsed_ms)
+            _redraw(metrics_view, sim)
+        frame_clock.sleep()
 
 
 def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
@@ -52,10 +94,6 @@ def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
         case c if c > -1:
             echo_view.echoch(c)
     return True
-
-
-def _update(sim):
-    sim.update()
 
 
 def _redraw(metrics_view, sim):

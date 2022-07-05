@@ -19,8 +19,11 @@ class Simulation:
         """
         self.world_map: SimpleMap = SimpleMap(height * width)
 
-    def update(self) -> None:
-        """Run the simulation for a given time-slice."""
+    def update(self, elapsed: float) -> None:
+        """Run the simulation for a given time-slice.
+
+        :param elapsed: time since last update in fractional milliseconds
+        """
         self.sim_value += 1
 
 
