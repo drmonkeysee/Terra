@@ -9,6 +9,7 @@ import typing
 from itertools import islice
 
 from terra.codepage import CP437, MISSING
+from terra.ui.clock import FPS
 
 if typing.TYPE_CHECKING:
     from terra.sim import SimpleMap, Simulation
@@ -159,16 +160,36 @@ class MapView(View):
 class FrameMetricsView(View):
     """Display frame performance metrics."""
 
+    # NOTE: refresh delta-t every quarter second for easier readability
+    _DT_REFRESH_INTERVAL = 0.25
+
     def __init__(self, y: int, x: int) -> None:
         """Create code page display view.
 
         :param y: y-position of view in screen-space
         :param x: x-position of view in screen-space
         """
-        super().__init__(5, 30, y, x, padding=2, title='Frame Metrics')
+        super().__init__(9, 30, y, x, padding=2, title='Frame Metrics')
+        self._display_dt = self._display_frame_left = self._refresh_dt = 0
 
     def draw(self, frame: FrameData, sim: Simulation) -> None:
-        self.content.addstr(0, 0, f'Sim value: {sim.sim_value}')
+        self._update_delta_t(frame)
+        self.content.addstr(0, 0, f'FPS: {FPS}')
+        self.content.addstr(1, 0,
+                            f'ΔT: {self._display_dt * 1000:.3f}'
+                            f' ({self._display_frame_left * 1000:+.3f})')
+        self.content.addstr(2, 0, f'Runtime: {frame.run_time:.3f}')
+        self.content.addstr(3, 0,
+                            f'Frames: {frame.total_frames}'
+                            f' ({frame.blown_frames})')
+        self.content.addstr(4, 0, f'Sim value: {sim.sim_value}')
+
+    def _update_delta_t(self, frame):
+        self._refresh_dt += frame.delta_time
+        if self._refresh_dt >= self._DT_REFRESH_INTERVAL:
+            self._display_dt = frame.delta_time
+            self._display_frame_left = frame.frame_left
+            self._refresh_dt = 0
 
 
 def center_in_win(parent_win: curses.window,

@@ -14,7 +14,7 @@ from dataclasses import dataclass
 if typing.TYPE_CHECKING:
     from types import TracebackType
 
-FPS: float = 30.0
+FPS: int = 30
 _VSYNC = 1.0 / FPS
 
 
@@ -24,6 +24,7 @@ class FrameData:
 
     All float values are in fractional seconds.
     """
+    blown_frames: int = 0
     delta_time: float = 0.0
     frame_left: float = 0.0
     run_time: float = 0.0
@@ -88,13 +89,15 @@ class FrameClock(AbstractContextManager):
         self._current = time.monotonic()
         # NOTE: cap maximum frame time to 1 second
         self._frame.delta_time = min(self._current - self._previous, 1.0)
-        self._frame.run_time += self._current - self._start
+        self._frame.run_time = self._current - self._start
 
     def _end_frame(self):
         self._previous = self._current
+        self._frame.total_frames += 1
         frame_elapsed = time.monotonic() - self._current
         # NOTE: we've blown our time budget :( so try to catch up
         if frame_elapsed > _VSYNC:
+            self._frame.blown_frames += 1
             return
         self._frame.frame_left = _VSYNC - frame_elapsed
         time.sleep(self._frame.frame_left)
