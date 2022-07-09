@@ -5,14 +5,15 @@ from __future__ import annotations
 import curses
 import curses.panel
 import enum
-import time
 import typing
 
-if typing.TYPE_CHECKING:
-    from terra.sim import Simulation
+from terra.ui.clock import FrameClock
 from terra.ui.views import (
     CodePageView, EchoInputView, FrameMetricsView, MapView, center_in_win
 )
+
+if typing.TYPE_CHECKING:
+    from terra.sim import Simulation
 
 
 def start(sim: Simulation) -> None:
@@ -27,39 +28,6 @@ class _KeyCode(enum.IntEnum):
     TOGGLE_ECHO = ord('o')
 
 
-_FPS = 30.0
-_VSYNC = 1.0 / _FPS
-
-
-class _FrameClock:
-    def __init__(self):
-        self.current = 0.0
-        self.previous = 0.0
-        self.budget = 0.0
-
-    @property
-    def budget_ms(self):
-        return self.budget * 1000
-
-    def start(self):
-        self.previous = time.monotonic()
-
-    def tick(self):
-        self.current = time.monotonic()
-        frametime = self.current - self.previous
-        # NOTE: don't let budget get beyond 1 second total
-        self.budget = min(self.budget + frametime, 1.0)
-
-    def sleep(self):
-        self.previous = self.current
-        frame_elapsed = time.monotonic() - self.current
-        # NOTE: we've blown our time budget :( so try to catch up
-        if frame_elapsed > _VSYNC:
-            return
-        frame_left = _VSYNC - frame_elapsed
-        time.sleep(frame_left)
-
-
 def _main_loop(stdscr, sim):
     stdscr.nodelay(True)
     curses.curs_set(0)
@@ -71,17 +39,15 @@ def _main_loop(stdscr, sim):
     echo_view = EchoInputView(10, 20, 3, 5)
     metrics_view = FrameMetricsView(15, 5)
 
-    frame_clock = _FrameClock()
-    frame_clock.start()
+    frame_clock = FrameClock()
     running = True
     while running:
-        frame_clock.tick()
-        running = _process_input(stdscr, codepage_view, map_view, echo_view,
-                                 sim)
-        if running:
-            sim.update(frame_clock.budget_ms)
-            _redraw(metrics_view, sim)
-        frame_clock.sleep()
+        with frame_clock as next_frame:
+            running = _process_input(stdscr, codepage_view, map_view,
+                                     echo_view, sim)
+            if running:
+                sim.update(next_frame.delta_ms)
+                _redraw(metrics_view, next_frame, sim)
 
 
 def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
@@ -99,8 +65,8 @@ def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
     return True
 
 
-def _redraw(metrics_view, sim):
-    metrics_view.draw(sim)
+def _redraw(metrics_view, frame, sim):
+    metrics_view.draw(frame, sim)
     curses.panel.update_panels()
     curses.doupdate()
 

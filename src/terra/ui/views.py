@@ -9,8 +9,10 @@ import typing
 from itertools import islice
 
 from terra.codepage import CP437, MISSING
+
 if typing.TYPE_CHECKING:
     from terra.sim import SimpleMap, Simulation
+    from terra.ui.clock import FrameData
 
 
 class View(abc.ABC):
@@ -165,7 +167,7 @@ class FrameMetricsView(View):
         """
         super().__init__(5, 30, y, x, padding=2, title='Frame Metrics')
 
-    def draw(self, sim: Simulation) -> None:
+    def draw(self, frame: FrameData, sim: Simulation) -> None:
         self.content.addstr(0, 0, f'Sim value: {sim.sim_value}')
 
 
