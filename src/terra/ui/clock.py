@@ -32,9 +32,7 @@ class FrameData:
 
     @property
     def delta_ms(self) -> float:
-        """Get frame delta time in fractional milliseconds instead of
-        fractional seconds.
-        """
+        """Get frame delta time in fractional milliseconds."""
         return self.delta_time * 1000
 
 
