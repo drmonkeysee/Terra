@@ -65,7 +65,7 @@ class FrameClock(AbstractContextManager):
         return self._frame
 
     def __exit__(self, exc_type: type | None, exc_value: BaseException | None,
-                 traceback: TracebackType | None) -> bool:
+                 traceback: TracebackType | None) -> typing.Literal[False]:
         """End the current frame.
 
         Will sleep the main thread if necessary to maintain the target FPS.
