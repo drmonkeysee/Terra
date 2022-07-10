@@ -7,9 +7,12 @@ class Simulation:
     """Primary simulation object."""
 
     def __init__(self) -> None:
-        """Initialize a new simulation."""
+        """Initialize a new simulation.
+
+        Attributes:
+            world_map: the current map of the world.
+        """
         self.create_map(0, 0)
-        self.sim_value: int = 0
 
     def create_map(self, height: int, width: int) -> None:
         """Generate a new world map.
@@ -17,9 +20,6 @@ class Simulation:
         Args:
             height: height of world map in cells.
             width: width of world map in cells.
-
-        Attributes:
-            world_map: the current map of the world.
         """
         self.world_map: SimpleMap = SimpleMap(height * width)
 
@@ -29,7 +29,7 @@ class Simulation:
         Args:
             elapsed: time since last update in fractional milliseconds.
         """
-        self.sim_value += 1
+        pass
 
 
 class SimpleMap:
