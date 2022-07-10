@@ -66,9 +66,13 @@ class _Scene:
         self._redraw(frame)
 
     def _layout_views(self):
+        # NOTE: measure left-pane from codepage view dimensions but place
+        # codepage below frame metrics once both windows' dimensions are known.
         self._codepage_view = CodePageView(0, 0)
-        left_pane_h, left_pane_w = self._codepage_view.frame.getmaxyx()
-        self._metrics_view = FrameMetricsView(left_pane_w, left_pane_h, 0)
+        left_pane_w = self._codepage_view.frame.getmaxyx()[1]
+        self._metrics_view = FrameMetricsView(left_pane_w, 0, 0)
+        self._codepage_view.frame.mvwin(self._metrics_view.frame.getmaxyx()[0],
+                                        0)
         screen_h, screen_w = self.stdscr.getmaxyx()
         self._map_view = MapView(screen_h, screen_w - left_pane_w, 0,
                                  left_pane_w)
