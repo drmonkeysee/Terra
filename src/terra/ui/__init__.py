@@ -9,7 +9,7 @@ import typing
 
 from terra.ui.clock import FrameClock
 from terra.ui.views import (
-    CodePageView, EchoInputView, FrameMetricsView, MapView, center_in_win
+    CodePageView, FrameMetricsView, MapView, center_in_win
 )
 
 if typing.TYPE_CHECKING:
@@ -25,7 +25,6 @@ class _KeyCode(enum.IntEnum):
     GEN_MAP = ord('m')
     QUIT = ord('q')
     TOGGLE_CODEPAGE = ord('c')
-    TOGGLE_ECHO = ord('o')
 
 
 def _main_loop(stdscr, sim):
@@ -36,21 +35,19 @@ def _main_loop(stdscr, sim):
     codepage_view.toggle_visibility()
     map_view = MapView(*center_in_win(stdscr, 32, 102))
     _new_map(map_view, sim)
-    echo_view = EchoInputView(10, 20, 3, 5)
     metrics_view = FrameMetricsView(15, 5)
 
     frame_clock = FrameClock()
     running = True
     while running:
         with frame_clock as next_frame:
-            running = _process_input(stdscr, codepage_view, map_view,
-                                     echo_view, sim)
+            running = _process_input(stdscr, codepage_view, map_view, sim)
             if running:
                 sim.update(next_frame.delta_ms)
                 _redraw(metrics_view, next_frame, sim)
 
 
-def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
+def _process_input(stdscr, codepage_view, map_view, sim):
     match stdscr.getch():
         case _KeyCode.GEN_MAP:
             _new_map(map_view, sim)
@@ -58,10 +55,6 @@ def _process_input(stdscr, codepage_view, map_view, echo_view, sim):
             return False
         case _KeyCode.TOGGLE_CODEPAGE:
             codepage_view.toggle_visibility()
-        case _KeyCode.TOGGLE_ECHO:
-            echo_view.toggle_visibility()
-        case c if c > -1:
-            echo_view.echoch(c)
     return True
 
 

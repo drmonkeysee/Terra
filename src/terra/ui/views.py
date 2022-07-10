@@ -86,24 +86,6 @@ class View(abc.ABC):
         self._frame.addstr(0, 1, title)
 
 
-class EchoInputView(View):
-    """Test view for echoing curses input."""
-
-    def __init__(self, *args: int) -> None:
-        """Initialize echo input view.
-
-        Args:
-            *args: size/position parameters passed to parent class.
-        """
-        super().__init__(*args, padding=1)
-        self.content.addstr(0, 0, 'Hello from Terra!')
-        self.content.move(2, 0)
-
-    def echoch(self, ch: int) -> None:
-        """Echo a character to the view's current cursor position."""
-        self.content.addch(ch)
-
-
 class CodePageView(View):
     """Code page 437 display view."""
 
