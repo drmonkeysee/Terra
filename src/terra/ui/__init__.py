@@ -8,9 +8,7 @@ import enum
 import typing
 
 from terra.ui.clock import FrameClock
-from terra.ui.views import (
-    CodePageView, FrameMetricsView, MapView, center_in_win
-)
+from terra.ui.views import CodePageView, FrameMetricsView, MapView
 
 if typing.TYPE_CHECKING:
     from terra.sim import Simulation
@@ -68,10 +66,12 @@ class _Scene:
         self._redraw(frame)
 
     def _layout_views(self):
-        self._codepage_view = CodePageView(5, 70)
-        self._codepage_view.toggle_visibility()
-        self._map_view = MapView(*center_in_win(self.stdscr, 32, 102))
-        self._metrics_view = FrameMetricsView(15, 5)
+        self._codepage_view = CodePageView(0, 0)
+        left_pane_h, left_pane_w = self._codepage_view.frame.getmaxyx()
+        self._metrics_view = FrameMetricsView(left_pane_w, left_pane_h, 0)
+        screen_h, screen_w = self.stdscr.getmaxyx()
+        self._map_view = MapView(screen_h, screen_w - left_pane_w, 0,
+                                 left_pane_w)
         self._new_map()
 
     def _redraw(self, frame):

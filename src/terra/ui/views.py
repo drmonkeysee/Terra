@@ -46,10 +46,13 @@ class View(abc.ABC):
             padding: padding between view frame and content;
                      if not set then content and frame are the same window.
             title: optional view title.
+
+        Attributes:
+            frame: the view's frame window.
         """
-        self._frame = curses.newwin(h, w, y, x)
-        self._frame_panel = curses.panel.new_panel(self._frame)
-        self._frame.box()
+        self.frame = curses.newwin(h, w, y, x)
+        self.frame_panel = curses.panel.new_panel(self.frame)
+        self.frame.box()
         self._content, self._content_panel = self._init_content(h, w, padding)
         if title:
             self._set_title(w, title)
@@ -57,25 +60,25 @@ class View(abc.ABC):
     @property
     def content(self) -> curses.window:
         """Get the view's content window."""
-        return self._content or self._frame
+        return self._content or self.frame
 
     def toggle_visibility(self) -> None:
         """Toggle view visibility."""
-        if self._frame_panel.hidden():
-            self._frame_panel.show()
+        if self.frame_panel.hidden():
+            self.frame_panel.show()
             if self._content_panel:
                 self._content_panel.show()
         else:
-            self._frame_panel.hide()
             if self._content_panel:
                 self._content_panel.hide()
+            self.frame_panel.hide()
 
     def _init_content(self, h, w, padding):
         if not padding:
             return None, None
         adjustment = 2 * padding
         ch, cw = h - adjustment, w - adjustment
-        content = self._frame.derwin(ch, cw, padding, padding)
+        content = self.frame.derwin(ch, cw, padding, padding)
         return content, curses.panel.new_panel(content)
 
     def _set_title(self, width, title):
@@ -83,7 +86,7 @@ class View(abc.ABC):
         title_overflow = (width - 2) - len(title)
         if title_overflow < 0:
             title = f'{title[:title_overflow - 1]}…'
-        self._frame.addstr(0, 1, title)
+        self.frame.addstr(0, 1, title)
 
 
 class CodePageView(View):
@@ -148,15 +151,19 @@ class FrameMetricsView(View):
     """Display frame performance metrics."""
     # NOTE: refresh delta-t every quarter second for easier readability
     _DT_REFRESH_INTERVAL = 0.25
+    _MIN_WIDTH = 28
 
-    def __init__(self, y: int, x: int) -> None:
+    def __init__(self, w: int, y: int, x: int) -> None:
         """Initialize code page display view.
 
         Args:
+            w: width of the view in cells; may be adjusted to a minimum
+               threshold if the given value is too small to fit content.
             y: y-position of view in screen-space.
             x: x-position of view in screen-space.
         """
-        super().__init__(8, 30, y, x, padding=2, title='Frame Metrics')
+        super().__init__(8, max(self._MIN_WIDTH, w), y, x,
+                         padding=2, title='Frame Metrics')
         self._display_dt = self._display_frame_left = self._refresh_dt = 0
 
     def redraw(self, frame: FrameData) -> None:
@@ -177,27 +184,3 @@ class FrameMetricsView(View):
             self._display_dt = frame.delta_time
             self._display_frame_left = frame.frame_left
             self._refresh_dt = 0
-
-
-def center_in_win(parent_win: curses.window,
-                  h: int, w: int) -> tuple[int, int, int, int]:
-    """Calculate y/x coordinates for centering a window of given size within a
-    parent window.
-
-    Args:
-        parent_win: the parent window in which to center the given dimensions.
-        h: child window height.
-        w: child window width.
-
-    Returns:
-        tuple of (height, width, y, x) coordinates centered within parent_win.
-
-    Raises:
-        ValueError: if parent_win is too small to fit the given dimensions.
-    """
-    parent_height, parent_width = parent_win.getmaxyx()
-    y, x = (parent_height - h) // 2, (parent_width - w) // 2
-    if y < 0 or x < 0:
-        raise ValueError('parent window is too small to contain'
-                         f' centered window of (h: {h}, w: {w})')
-    return h, w, y, x
