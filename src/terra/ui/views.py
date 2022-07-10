@@ -32,18 +32,20 @@ class View(abc.ABC):
     @abc.abstractmethod
     def __init__(self, h: int, w: int, y: int, x: int, /,
                  *, padding: int = 0, title: str | None = None) -> None:
-        """Create a new view.
+        """Initialize a new view.
 
         Must be overridden by subclasses.
-        :param h: height of view in cells; if padding is specified this is the
-                  height of the view's frame, not the nested content
-        :param w: width of view in cells; if padding is specified this is the
-                  width of the view's frame, not the nested content
-        :param y: y-position of view in screen-space
-        :param x: x-position of view in screen-space
-        :param padding: padding between view frame and content;
-                        if not set then content and frame are the same window
-        :param title: optional view title
+
+        Args:
+            h: height of view in cells; if padding is specified this is the
+               height of the view's frame, not the nested content.
+            w: width of view in cells; if padding is specified this is the
+               width of the view's frame, not the nested content.
+            y: y-position of view in screen-space.
+            x: x-position of view in screen-space.
+            padding: padding between view frame and content;
+                     if not set then content and frame are the same window.
+            title: optional view title.
         """
         self._frame = curses.newwin(h, w, y, x)
         self._frame_panel = curses.panel.new_panel(self._frame)
@@ -88,9 +90,10 @@ class EchoInputView(View):
     """Test view for echoing curses input."""
 
     def __init__(self, *args: int) -> None:
-        """Create echo input view.
+        """Initialize echo input view.
 
-        :param *args: size/position parameters passed to parent class
+        Args:
+            *args: size/position parameters passed to parent class.
         """
         super().__init__(*args, padding=1)
         self.content.addstr(0, 0, 'Hello from Terra!')
@@ -105,10 +108,11 @@ class CodePageView(View):
     """Code page 437 display view."""
 
     def __init__(self, y: int, x: int) -> None:
-        """Create code page display view.
+        """Initialize code page display view.
 
-        :param y: y-position of view in screen-space
-        :param x: x-position of view in screen-space
+        Args:
+            y: y-position of view in screen-space.
+            x: x-position of view in screen-space.
         """
         # NOTE: 16x16 display
         dim = 16
@@ -138,9 +142,10 @@ class MapView(View):
     """Display simple map view."""
 
     def __init__(self, *args: int) -> None:
-        """Create a simple map view.
+        """Initialize a simple map view.
 
-        :param *args: size/position parameters passed to parent class
+        Args:
+            *args: size/position parameters passed to parent class.
         """
         super().__init__(*args, padding=1, title='Terra')
 
@@ -163,15 +168,17 @@ class FrameMetricsView(View):
     _DT_REFRESH_INTERVAL = 0.25
 
     def __init__(self, y: int, x: int) -> None:
-        """Create code page display view.
+        """Initialize code page display view.
 
-        :param y: y-position of view in screen-space
-        :param x: x-position of view in screen-space
+        Args:
+            y: y-position of view in screen-space.
+            x: x-position of view in screen-space.
         """
         super().__init__(9, 30, y, x, padding=2, title='Frame Metrics')
         self._display_dt = self._display_frame_left = self._refresh_dt = 0
 
     def draw(self, frame: FrameData, sim: Simulation) -> None:
+        """Refresh view with the latest frame stats."""
         self._update_delta_t(frame)
         self.content.addstr(0, 0, f'FPS: {FPS}')
         self.content.addstr(1, 0,
@@ -196,13 +203,16 @@ def center_in_win(parent_win: curses.window,
     """Calculate y/x coordinates for centering a window of given size within a
     parent window.
 
-    :param parent_win: the parent window in which to center the given
-                       dimensions
-    :param h: child window height
-    :param w: child window width
-    :returns: tuple of (height, width, y, x) coordinates centered within
-              parent_win
-    :raises ValueError: if parent_win is too small to fit the given dimensions
+    Args:
+        parent_win: the parent window in which to center the given dimensions.
+        h: child window height.
+        w: child window width.
+
+    Returns:
+        tuple of (height, width, y, x) coordinates centered within parent_win.
+
+    Raises:
+        ValueError: if parent_win is too small to fit the given dimensions.
     """
     parent_height, parent_width = parent_win.getmaxyx()
     y, x = (parent_height - h) // 2, (parent_width - w) // 2

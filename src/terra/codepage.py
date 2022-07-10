@@ -1,4 +1,9 @@
-"""Code page definition."""
+"""Code page definition.
+
+Attributes:
+    MISSING (constant): placeholder glyph to denote an invalid value.
+    CP437 (constant): All of the code page 437 glyphs.
+"""
 
 MISSING: str = '\ufffd'
 CP437: tuple[str, ...] = (
