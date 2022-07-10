@@ -12,7 +12,7 @@ from terra.codepage import CP437, MISSING
 from terra.ui.clock import FPS
 
 if typing.TYPE_CHECKING:
-    from terra.sim import SimpleMap, Simulation
+    from terra.sim import SimpleMap
     from terra.ui.clock import FrameData
 
 
@@ -159,7 +159,7 @@ class FrameMetricsView(View):
         super().__init__(8, 30, y, x, padding=2, title='Frame Metrics')
         self._display_dt = self._display_frame_left = self._refresh_dt = 0
 
-    def draw(self, frame: FrameData, sim: Simulation) -> None:
+    def redraw(self, frame: FrameData) -> None:
         """Refresh view with the latest frame stats."""
         self._update_delta_t(frame)
         self.content.addstr(0, 0, f'FPS: {FPS}')
