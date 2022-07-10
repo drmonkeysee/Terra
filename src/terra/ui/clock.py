@@ -15,7 +15,7 @@ if typing.TYPE_CHECKING:
     from types import TracebackType
 
 FPS: int = 30
-_VSYNC = 1.0 / FPS
+_VSYNC = 1 / FPS
 
 
 @dataclass
@@ -92,10 +92,9 @@ class FrameClock(AbstractContextManager):
     def _end_frame(self):
         self._previous = self._current
         self._frame.total_frames += 1
-        frame_elapsed = time.monotonic() - self._current
-        # NOTE: we've blown our time budget :( so try to catch up
-        if frame_elapsed > _VSYNC:
+        self._frame.frame_left = _VSYNC - (time.monotonic() - self._current)
+        # NOTE: if we've blown our time budget, don't sleep :(
+        if self._frame.frame_left > 0:
+            time.sleep(self._frame.frame_left)
+        else:
             self._frame.blown_frames += 1
-            return
-        self._frame.frame_left = _VSYNC - frame_elapsed
-        time.sleep(self._frame.frame_left)

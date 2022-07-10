@@ -1,4 +1,4 @@
-"""Curses UI layer, including main game loop."""
+"""Terra UI layer, including the main game loop."""
 
 from __future__ import annotations
 

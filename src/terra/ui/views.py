@@ -159,7 +159,6 @@ class MapView(View):
 
 class FrameMetricsView(View):
     """Display frame performance metrics."""
-
     # NOTE: refresh delta-t every quarter second for easier readability
     _DT_REFRESH_INTERVAL = 0.25
 
