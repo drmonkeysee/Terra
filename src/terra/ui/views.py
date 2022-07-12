@@ -99,7 +99,6 @@ class CodePageView(View):
             y: y-position of view in screen-space.
             x: x-position of view in screen-space.
         """
-        # NOTE: 16x16 display
         dim = 16
         height = dim + 4
         width = (dim * 2) + 3
@@ -154,7 +153,7 @@ class FrameMetricsView(View):
     _MIN_WIDTH = 28
 
     def __init__(self, w: int, y: int, x: int) -> None:
-        """Initialize code page display view.
+        """Initialize frame performance view.
 
         Args:
             w: width of the view in cells; may be adjusted to a minimum

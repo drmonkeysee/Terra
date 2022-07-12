@@ -37,7 +37,6 @@ class SimpleMap:
 
     Cells are indexes into a code page, which resolves to a specific glyph.
     """
-
     _CHAR_MAP: tuple[int, ...] = (0x20, 0x5, 0x6, 0x27, 0x2c, 0x3a, 0x3b)
     _WEIGHTS: tuple[int, ...] = tuple([100 - (5 * (len(_CHAR_MAP) - 1))]
                                       + ([5] * (len(_CHAR_MAP) - 1)))

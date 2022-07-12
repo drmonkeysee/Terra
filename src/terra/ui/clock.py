@@ -79,7 +79,6 @@ class FrameClock(AbstractContextManager):
             False, i.e. does not handle any exceptions thrown within the
             runtime context.
         """
-        # TODO: should we skip frame end if an exception occurred?
         self._end_frame()
         return False
 
