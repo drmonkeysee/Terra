@@ -133,17 +133,17 @@ class MapView(View):
         """
         super().__init__(*args, padding=1, title='Terra')
 
-    def draw_map(self, world_map: SimpleMap) -> None:
+    def redraw(self, world_map: list[int]) -> None:
         """Draw the map made of the given cells."""
         h, w = self.content.getmaxyx()
-        safe_cells = islice(world_map.cells, len(world_map.cells) - 1)
+        safe_cells = islice(world_map, len(world_map) - 1)
         for i, c in enumerate(safe_cells):
             y, x = divmod(i, w)
             self.content.addstr(y, x, CP437[c])
         # NOTE: last cell (lower-right) must be inserted instead of added to
         # avoid the error thrown by trying to wrap the cursor off the edge
         # of the window.
-        self.content.insstr(h - 1, w - 1, CP437[world_map.cells[-1]])
+        self.content.insstr(h - 1, w - 1, CP437[world_map[-1]])
 
 
 class FrameMetricsView(View):

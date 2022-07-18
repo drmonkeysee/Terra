@@ -68,10 +68,10 @@ class WorldScene:
 
     def _redraw(self, frame):
         self._metrics_view.redraw(frame)
+        self._map_view.redraw(self._sim.visible_map)
 
     def _new_map(self):
         self._sim.create_map(*self._map_view.content.getmaxyx())
-        self._map_view.draw_map(self._sim.world_map)
 
 
 class _KeyCode(enum.IntEnum):

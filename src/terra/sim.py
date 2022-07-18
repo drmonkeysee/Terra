@@ -13,6 +13,14 @@ class Simulation:
             world_map: the current map of the world.
         """
         self.create_map(0, 0)
+        self._wanderer = Wanderer(0, 0)
+
+    @property
+    def visible_map(self) -> list[int]:
+        tiles = self.world_map.cells.copy()
+        tiles[self._wanderer.x
+              + (self._wanderer.y * self.width)] = self._wanderer.render_id
+        return tiles
 
     def create_map(self, height: int, width: int) -> None:
         """Generate a new world map.
@@ -22,6 +30,8 @@ class Simulation:
             width: width of world map in cells.
         """
         self.world_map: SimpleMap = SimpleMap(height * width)
+        self.height = height
+        self.width = width
 
     def update(self, elapsed: float) -> None:
         """Run the simulation for a given time-slice.
@@ -29,7 +39,7 @@ class Simulation:
         Args:
             elapsed: time since last update in fractional milliseconds.
         """
-        pass
+        self._wanderer.update(elapsed, self.height, self.width)
 
 
 class SimpleMap:
@@ -52,12 +62,38 @@ class SimpleMap:
             cells: the cells making up the map.
         """
         self.size = size
-        self.cells: tuple[int, ...] = self._buildcells()
+        self.cells: list[int] = self._buildcells()
 
     def _buildcells(self):
-        cells = random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
-                               k=self.size)
-        if cells:
-            cells[0] = 0x41     # 'A'
-            cells[-1] = 0x5a    # 'Z'
-        return tuple(cells)
+        return random.choices(self._CHAR_MAP, weights=self._WEIGHTS,
+                              k=self.size)
+
+
+class Wanderer:
+    # TODO: this is way too coupled to everything else
+    _THRESHOLD = 100
+
+    def __init__(self, y, x):
+        self.y = y
+        self.x = x
+        self._energy = 0.0
+        self.render_id = 0x40
+
+    def update(self, elapsed, screenh, screenw):
+        self._energy += elapsed
+        if self._energy > self._THRESHOLD:
+            y, x = self._move()
+            if 0 <= y < screenh and 0 <= x < screenw:
+                self.y, self.x = y, x
+            self._energy = 0.0
+
+    def _move(self):
+        match random.randint(1, 4):
+            case 1:
+                return self.y, self.x + 1
+            case 2:
+                return self.y - 1, self.x
+            case 3:
+                return self.y, self.x - 1
+            case 4:
+                return self.y + 1, self.x
