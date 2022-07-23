@@ -1,5 +1,6 @@
 """Terra simulation models."""
 
+import enum
 import random
 
 
@@ -12,14 +13,13 @@ class Simulation:
         Attributes:
             world_map: the current map of the world.
         """
-        self.create_map(0, 0)
-        self._wanderer = Wanderer(0, 0)
+        self._entities = []
 
     @property
     def visible_map(self) -> list[int]:
         tiles = self.world_map.cells.copy()
-        tiles[self._wanderer.x
-              + (self._wanderer.y * self.width)] = self._wanderer.render_id
+        for entity in self._entities:
+            tiles[entity.x + (entity.y * self.width)] = entity.render_id
         return tiles
 
     def create_map(self, height: int, width: int) -> None:
@@ -32,6 +32,12 @@ class Simulation:
         self.world_map: SimpleMap = SimpleMap(height * width)
         self.height = height
         self.width = width
+        self._entities.append(_Wanderer(random.randrange(height),
+                                        random.randrange(width)))
+        self._entities.append(_Zipper(random.randrange(height),
+                                      random.randrange(width)))
+        self._entities.append(_Bouncer(random.randrange(height),
+                                       random.randrange(width)))
 
     def update(self, elapsed: float) -> None:
         """Run the simulation for a given time-slice.
@@ -39,7 +45,8 @@ class Simulation:
         Args:
             elapsed: time since last update in fractional milliseconds.
         """
-        self._wanderer.update(elapsed, self.height, self.width)
+        for entity in self._entities:
+            entity.update(elapsed, self.height, self.width)
 
 
 class SimpleMap:
@@ -69,9 +76,27 @@ class SimpleMap:
                               k=self.size)
 
 
-class Wanderer:
-    # TODO: this is way too coupled to everything else
-    _THRESHOLD = 100
+class _Direction(enum.Enum):
+    RIGHT = enum.auto()
+    UP = enum.auto()
+    LEFT = enum.auto()
+    DOWN = enum.auto()
+
+    def reverse(self):
+        match self:
+            case _Direction.RIGHT:
+                return _Direction.LEFT
+            case _Direction.UP:
+                return _Direction.DOWN
+            case _Direction.LEFT:
+                return _Direction.RIGHT
+            case _Direction.DOWN:
+                return _Direction.UP
+
+
+# TODO: these are all way too coupled to everything else
+class _Wanderer:
+    _VELOCITY = 200
 
     def __init__(self, y, x):
         self.y = y
@@ -81,19 +106,95 @@ class Wanderer:
 
     def update(self, elapsed, screenh, screenw):
         self._energy += elapsed
-        if self._energy > self._THRESHOLD:
+        if self._energy > self._VELOCITY:
             y, x = self._move()
             if 0 <= y < screenh and 0 <= x < screenw:
                 self.y, self.x = y, x
             self._energy = 0.0
 
     def _move(self):
-        match random.randint(1, 4):
-            case 1:
+        match random.choice(tuple(_Direction)):
+            case _Direction.RIGHT:
                 return self.y, self.x + 1
-            case 2:
+            case _Direction.UP:
                 return self.y - 1, self.x
-            case 3:
+            case _Direction.LEFT:
                 return self.y, self.x - 1
-            case 4:
+            case _Direction.DOWN:
+                return self.y + 1, self.x
+
+
+class _Zipper:
+    _VELOCITY = 50
+    _SHIFT = 1000
+
+    def __init__(self, y, x):
+        self.y = y
+        self.x = x
+        self._attention = self._energy = 0.0
+        self._direction = _Direction.RIGHT
+
+    @property
+    def render_id(self):
+        return (0x1a, 0x18, 0x1b, 0x19)[self._direction.value - 1]
+
+    def update(self, elapsed, screenh, screenw):
+        self._energy += elapsed
+        self._attention += elapsed
+        if self._energy > self._VELOCITY:
+            self._energy = 0.0
+            y, x = self._move()
+            if 0 <= y < screenh and 0 <= x < screenw:
+                self.y, self.x = y, x
+            else:
+                self._direction = self._direction.reverse()
+        if self._attention > self._SHIFT:
+            self._attention = 0.0
+            self._direction = random.choice(tuple(_Direction))
+
+    def _move(self):
+        match self._direction:
+            case _Direction.RIGHT:
+                return self.y, self.x + 1
+            case _Direction.UP:
+                return self.y - 1, self.x
+            case _Direction.LEFT:
+                return self.y, self.x - 1
+            case _Direction.DOWN:
+                return self.y + 1, self.x
+
+
+class _Bouncer:
+    _VELOCITY = 100
+
+    def __init__(self, y, x):
+        self.y = y
+        self.x = x
+        self.render_id = 0xe8
+        self._energy = 0.0
+        self._directions = [_Direction.UP, _Direction.RIGHT]
+        self._active_direction = 0
+
+    def update(self, elapsed, screenh, screenw):
+        self._energy += elapsed
+        if self._energy > self._VELOCITY:
+            y, x = self._move()
+            if y < 0 or y >= screenh:
+                self._directions[0] = self._directions[0].reverse()
+            elif x < 0 or x >= screenw:
+                self._directions[1] = self._directions[1].reverse()
+            else:
+                self.y, self.x = y, x
+                self._active_direction = (self._active_direction + 1) % 2
+            self._energy = 0.0
+
+    def _move(self):
+        match self._directions[self._active_direction]:
+            case _Direction.RIGHT:
+                return self.y, self.x + 1
+            case _Direction.UP:
+                return self.y - 1, self.x
+            case _Direction.LEFT:
+                return self.y, self.x - 1
+            case _Direction.DOWN:
                 return self.y + 1, self.x
